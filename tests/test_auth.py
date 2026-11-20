@@ -15,8 +15,10 @@ def test_register_duplicate(client, auth):
 
 
 def test_register_validation(client):
-    assert client.post("/auth/register", json={"username": "ab", "password": "secret123"}).status_code == 422
-    assert client.post("/auth/register", json={"username": "bob", "password": "short"}).status_code == 422
+    too_short_name = {"username": "ab", "password": "secret123"}
+    too_short_password = {"username": "bob", "password": "short"}
+    assert client.post("/auth/register", json=too_short_name).status_code == 422
+    assert client.post("/auth/register", json=too_short_password).status_code == 422
 
 
 def test_login_wrong_password(client, auth):
