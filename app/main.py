@@ -1,21 +1,11 @@
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database import Base, engine
 from app.routers import auth, todos
 
-
-@asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    Base.metadata.create_all(bind=engine)
-    yield
-
-
-app = FastAPI(title="Todo API", version="0.1.0", lifespan=lifespan)
+# Схема БД создаётся миграциями: alembic upgrade head
+app = FastAPI(title="Todo API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,

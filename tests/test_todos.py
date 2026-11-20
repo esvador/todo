@@ -26,7 +26,8 @@ def test_list_filter_search_pagination(client, auth):
     client.patch(f"/todos/{done['id']}", json={"is_done": True}, headers=auth)
 
     assert len(client.get("/todos", headers=auth).json()) == 3
-    assert [t["title"] for t in client.get("/todos?is_done=true", headers=auth).json()] == ["Write code"]
+    done_todos = client.get("/todos?is_done=true", headers=auth).json()
+    assert [t["title"] for t in done_todos] == ["Write code"]
     assert len(client.get("/todos?is_done=false", headers=auth).json()) == 2
     assert len(client.get("/todos?q=buy", headers=auth).json()) == 2
     assert len(client.get("/todos?limit=2", headers=auth).json()) == 2
