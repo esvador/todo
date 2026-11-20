@@ -3,21 +3,33 @@
 Бэкенд для списка задач на FastAPI с JWT-авторизацией. Каждый пользователь видит только свои задачи.
 
 ## Стек
-FastAPI, SQLAlchemy 2, SQLite (меняется через `DATABASE_URL`), PyJWT, Argon2 (pwdlib), pytest.
+FastAPI, SQLAlchemy 2, Alembic, SQLite (меняется через `DATABASE_URL`), PyJWT, Argon2 (pwdlib), pytest, ruff.
 
 ## Запуск
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env   # и задайте SECRET_KEY
+pip install -r requirements-dev.txt   # для продакшена достаточно requirements.txt
+copy .env.example .env                # и задайте SECRET_KEY
+alembic upgrade head                  # создать/обновить таблицы
 uvicorn app.main:app --reload
 ```
 
 Документация (Swagger): http://127.0.0.1:8000/docs. Кнопка **Authorize** позволяет залогиниться прямо там.
 
-Таблицы создаются автоматически при старте.
+## Миграции
+
+Схема БД управляется через Alembic. После изменения моделей в `app/models.py`:
+
+```powershell
+alembic revision --autogenerate -m "add priority to todos"   # создать миграцию
+# проверить сгенерированный файл в alembic/versions/
+alembic upgrade head                                          # применить
+alembic downgrade -1                                          # откатить последнюю
+```
+
+Тест `tests/test_migrations.py` падает, если модели изменили, а миграцию забыли создать.
 
 ## Эндпоинты
 
@@ -50,7 +62,8 @@ curl localhost:8000/todos -H "Authorization: Bearer $TOKEN"
 
 ```powershell
 pytest
-ruff check app tests
+ruff check .
+ruff format .
 ```
 
 ## Структура
@@ -65,5 +78,6 @@ app/
   security.py    хеширование паролей, JWT
   deps.py        зависимости (сессия БД, текущий пользователь)
   routers/       auth.py, todos.py
+alembic/         миграции БД (versions/ — файлы миграций)
 tests/
 ```
